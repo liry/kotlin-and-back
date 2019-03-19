@@ -12,6 +12,11 @@ import java.util.*
  *      kotlinOptions.allWarningsAsErrors = true
  * }
  *
+ * or in Kotlin DSL:
+ * tasks.withType<KotlinCompile> {
+ *     kotlinOptions.allWarningsAsErrors = true
+ * }
+ *
  * or param -Werror can be used  -> warnings are switched to error on compile time
  *
  * 
@@ -31,7 +36,7 @@ import java.util.*
  */
 
 fun main() {
-    PropertyShadowing(1).inc(5)
+    PropertyShadowing(1).inc(5) // returns random int
 
     PropertyShadowingSubclass().inc(5)
 
@@ -40,16 +45,16 @@ fun main() {
 
 class PropertyShadowing(private var num: Int) {
 
-    fun inc(num: Int) {
+    fun inc(num: Int) { // IDEA warns that num is never used
 
-        val num = Random(9).nextInt()
+        val num = Random(9).nextInt() // IDEA warns that the name num is shadowed
 
-        this.num = num
+        this.num = num // this.num does refer to a class property
 
         if (this.num > 0) {
-            val num = 3
+            val num = 3 // IDEA warns here about both shadowing and unused variable
         }
-        println("num: $num")
+        println("num: $num") // refers to local value - i.e. random int
     }
 }
 
@@ -60,16 +65,16 @@ class PropertyShadowing(private var num: Int) {
 
 class PropertyShadowingSubclass(override var num: Int = -5) : PropertyShadowingSuperclass(num) {
 
-    fun inc(num: Int) {
+    fun inc(num: Int) { // IDEA warns that num is never used
 
-        val num = Random(8).nextInt()
+        val num = Random(8).nextInt() // IDEA warns that the name num is shadowed
 
-        this.num = super.num
+        this.num = super.num // both are -5 here
 
         if (this.num > 0) {
-            val num = 3
+            val num = 3 // IDEA warns here about both shadowing and unused variable
         }
-        println("num: $num")
+        println("num: $num") // refers to local value - i.e. random int
     }
 }
 
@@ -79,7 +84,7 @@ open class PropertyShadowingSuperclass(open val num: Int)
 
 
 fun shadowingUseCase(someUserInput: String): Int {
-    val someUserInput = someUserInput.trim().toLowerCase()
+    val someUserInput = someUserInput.trim().toLowerCase() // IDEA warns that the name num is shadowed
     return someUserInput.length
 }
 
